@@ -213,7 +213,12 @@ export default function LoginPage() {
             {/* Logo */}
             <div className={`transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               {brandSettings?.logo ? (
-                <img src={brandSettings.logo} alt="Logo" className="h-10 object-contain brightness-0 invert" />
+                <img
+                  src={brandSettings.logo.startsWith('http') ? brandSettings.logo : brandSettings.logo}
+                  alt="Logo"
+                  className="h-10 object-contain"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
               ) : (
                 <div className="flex items-center gap-3">
                   <div className="relative">
