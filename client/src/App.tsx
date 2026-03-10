@@ -175,7 +175,7 @@ function PermissionRoute({
 }
 
 function ProtectedRoutes() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, userPlans, isUserPlansLoading } = useAuth();
   const [location, setLocation] = useLocation();
 
   // Check flag immediately on mount - synchronously
@@ -200,9 +200,26 @@ function ProtectedRoutes() {
 
       if (requiredPermission && !hasRoutePermission(requiredPermission, user)) {
         setLocation("/dashboard");
+        return;
       }
     }
-  }, [location, isAuthenticated, user, setLocation]);
+
+    // 🔥 SUBSCRIPTION EXPIRATION REDIRECT
+    if (isAuthenticated && user && user.role !== "superadmin") {
+      const safePaths = ["/plans", "/account", "/billing", "/plan-upgrade", "/support-tickets", "/user-support-tickets"];
+      if (!safePaths.includes(location)) {
+        if (!isUserPlansLoading && userPlans) {
+          const hasActive = (userPlans as any).data?.some((p: any) =>
+            p.subscription.status === "active" &&
+            (!p.subscription.endDate || new Date(p.subscription.endDate) > new Date())
+          );
+          if (!hasActive) {
+            setLocation("/plans");
+          }
+        }
+      }
+    }
+  }, [location, isAuthenticated, user, userPlans, isUserPlansLoading, setLocation]);
 
   // Priority 1: Show login animation loader immediately
   if (showLoading && isLoginRedirect) {
