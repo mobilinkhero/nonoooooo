@@ -517,15 +517,17 @@ export const verifyEmailOTP = async (req: Request, res: Response) => {
       if (existingSub.length === 0) {
         // Find a trial or basic plan
         const allPlans = await db.select().from(plans).limit(10);
-        const trialPlan = allPlans.find(p =>
-          p.name.toLowerCase().includes('trial') ||
-          p.name.toLowerCase().includes('free') ||
-          p.monthlyPrice === "0"
-        ) || allPlans[0];
+        const trialPlan = (allPlans as any).find((p: any) => p.isTrial === true) ||
+          allPlans.find(p =>
+            p.name.toLowerCase().includes('trial') ||
+            p.name.toLowerCase().includes('free') ||
+            p.monthlyPrice === "0"
+          ) || allPlans[0];
 
         if (trialPlan) {
           const endDate = new Date();
-          endDate.setDate(endDate.getDate() + 7); // 7 day trial
+          const trialDays = (trialPlan as any).trialDays || 7;
+          endDate.setDate(endDate.getDate() + trialDays); // Use plan configured trial days
 
           await db.insert(subscriptions).values({
             userId: userData.id,
@@ -537,7 +539,7 @@ export const verifyEmailOTP = async (req: Request, res: Response) => {
             paymentGateway: "system", // Internal system trial
           });
 
-          console.log(`✅ Assigned trial plan '${trialPlan.name}' to user ${userData.email}`);
+          console.log(`✅ Assigned trial plan '${trialPlan.name}' to user ${userData.email} for ${trialDays} days`);
         }
       }
     } catch (subError) {

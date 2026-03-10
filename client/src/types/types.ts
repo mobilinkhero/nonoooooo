@@ -41,6 +41,8 @@ export interface Plan {
   annualPrice: string;
   permissions: PlanPermissions;
   features: Feature[];
+  isTrial?: boolean;
+  trialDays?: number;
   createdAt: string;
   updatedAt: string;
 }

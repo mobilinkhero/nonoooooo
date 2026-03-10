@@ -62,6 +62,8 @@ interface FormData {
   buttonColor: string;
   monthlyPrice: string;
   annualPrice: string;
+  isTrial: boolean;
+  trialDays: number;
   permissions: PlanPermissions;
   features: Feature[];
 }
@@ -159,6 +161,8 @@ export default function Plans() {
     buttonColor: "bg-blue-500 hover:bg-blue-600",
     monthlyPrice: "0",
     annualPrice: "0",
+    isTrial: false,
+    trialDays: 7,
     permissions: {
       channel: "",
       contacts: "",
@@ -399,6 +403,8 @@ export default function Plans() {
       buttonColor: plan.buttonColor || "bg-blue-500 hover:bg-blue-600",
       monthlyPrice: plan.monthlyPrice || "0",
       annualPrice: plan.annualPrice || "0",
+      isTrial: plan.isTrial || false,
+      trialDays: plan.trialDays || 7,
       permissions: {
         channel: "",
         contacts: "",
@@ -436,6 +442,8 @@ export default function Plans() {
       buttonColor: "bg-blue-500 hover:bg-blue-600",
       monthlyPrice: "0",
       annualPrice: "0",
+      isTrial: false,
+      trialDays: 7,
       permissions: { channel: "", contacts: "", automation: "", campaign: "", apiRequestsPerMonth: "", apiRateLimitPerMinute: "" },
       features: [],
     });
@@ -572,11 +580,10 @@ export default function Plans() {
                     <div className="inline-flex items-center gap-2 bg-gray-100 rounded-lg p-1">
                       <button
                         onClick={() => setIsAnnual(false)}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all w-full sm:w-auto text-center ${
-                          !isAnnual
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all w-full sm:w-auto text-center ${!isAnnual
                             ? "bg-white text-gray-900 shadow-sm"
                             : "text-gray-600 hover:text-gray-900"
-                        }`}
+                          }`}
                         aria-pressed={!isAnnual}
                       >
                         <span className="truncate">
@@ -586,11 +593,10 @@ export default function Plans() {
 
                       <button
                         onClick={() => setIsAnnual(true)}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all w-full sm:w-auto text-center ${
-                          isAnnual
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all w-full sm:w-auto text-center ${isAnnual
                             ? "bg-white text-gray-900 shadow-sm"
                             : "text-gray-600 hover:text-gray-900"
-                        }`}
+                          }`}
                         aria-pressed={isAnnual}
                       >
                         <span className="truncate inline-flex items-center">
@@ -765,6 +771,40 @@ export default function Plans() {
                         placeholder={t("plans.form.annualPricePlaceholder")}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
+                    </div>
+
+                    <div className="flex items-center gap-4 pt-8">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.isTrial}
+                          onChange={(e) =>
+                            setFormData({ ...formData, isTrial: e.target.checked })
+                          }
+                          className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          Mark as Free Trial Plan
+                        </span>
+                      </label>
+
+                      {formData.isTrial && (
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm text-gray-700">Trial Days:</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={formData.trialDays}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                trialDays: parseInt(e.target.value) || 0,
+                              })
+                            }
+                            className="w-20 px-2 py-1 border border-gray-300 rounded-md outline-none"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1053,7 +1093,7 @@ export default function Plans() {
                       {editingPlan
                         ? t("plans.buttons.updatePlan")
                         : t("plans.buttons.createPlan")}
-                        
+
                     </Button>
                   </div>
                 </div>
@@ -1118,11 +1158,9 @@ export default function Plans() {
                     return (
                       <div
                         key={plan.id}
-                        className={`relative bg-white rounded-xl shadow-md border-2 ${
-                          plan.color
-                        } hover:shadow-lg transition-all duration-300 overflow-hidden ${
-                          isPopular ? "ring-2 ring-blue-500 ring-offset-2" : ""
-                        } flex flex-col h-full`}
+                        className={`relative bg-white rounded-xl shadow-md border-2 ${plan.color
+                          } hover:shadow-lg transition-all duration-300 overflow-hidden ${isPopular ? "ring-2 ring-blue-500 ring-offset-2" : ""
+                          } flex flex-col h-full`}
                       >
                         {plan.badge && (
                           <div className="absolute top-0 right-0 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
@@ -1193,11 +1231,10 @@ export default function Plans() {
                                     <X className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                                   )}
                                   <span
-                                    className={`text-sm ${
-                                      feature.included
+                                    className={`text-sm ${feature.included
                                         ? "text-gray-700"
                                         : "text-gray-400"
-                                    }`}
+                                      }`}
                                   >
                                     {feature.name}
                                   </span>

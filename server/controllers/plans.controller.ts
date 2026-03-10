@@ -65,6 +65,8 @@ export const createPlan = async (req: Request, res: Response) => {
       buttonColor,
       monthlyPrice,
       annualPrice,
+      isTrial,
+      trialDays,
       permissions,
       features
     } = req.body;
@@ -79,6 +81,8 @@ export const createPlan = async (req: Request, res: Response) => {
       buttonColor,
       monthlyPrice,
       annualPrice,
+      isTrial: isTrial || false,
+      trialDays: trialDays || 7,
       permissions,
       features
     }).returning();

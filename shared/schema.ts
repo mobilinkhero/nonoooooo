@@ -594,6 +594,9 @@ export const plans = pgTable("plans", {
   mercadopagoPlanIdMonthly: varchar("mercadopago_plan_id_monthly"),
   mercadopagoPlanIdAnnual: varchar("mercadopago_plan_id_annual"),
 
+  isTrial: boolean("is_trial").default(false),
+  trialDays: integer("trial_days").default(7),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
