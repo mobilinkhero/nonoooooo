@@ -1,0 +1,29 @@
+# Dependencies - never commit these (too large, not source code)
+node_modules/
+
+# Environment variables - NEVER commit (contains secrets/passwords)
+.env
+
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# Uploads (user-generated content)
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files created during development
+tmp_*.ts
+
+# Migrations (optional - uncomment if you want to exclude them)
+# migrations/
