@@ -70,7 +70,7 @@ interface ParsedPanelConfig
     supportEmail: string;
     currency: string;
     country: string;
-  }> {}
+  }> { }
 
 // Helper function to process base64 images
 const processBase64Image = async (
@@ -134,16 +134,14 @@ export const create = async (req: Request, res: Response) => {
 
     const logoPath = logoFile
       ? logoFile.cloudUrl ||
-        `/uploads/${path.basename(path.dirname(logoFile.path))}/${
-          logoFile.filename
-        }`
+      `/uploads/${path.basename(path.dirname(logoFile.path))}/${logoFile.filename
+      }`
       : undefined;
 
     const faviconPath = faviconFile
       ? faviconFile.cloudUrl ||
-        `/uploads/${path.basename(path.dirname(faviconFile.path))}/${
-          faviconFile.filename
-        }`
+      `/uploads/${path.basename(path.dirname(faviconFile.path))}/${faviconFile.filename
+      }`
       : undefined;
 
     // ✅ Log the file type (Cloud / Local)
@@ -153,8 +151,7 @@ export const create = async (req: Request, res: Response) => {
       );
     if (faviconFile)
       console.log(
-        `🌐 Favicon: ${
-          faviconFile.cloudUrl ? "Cloud" : "Local"
+        `🌐 Favicon: ${faviconFile.cloudUrl ? "Cloud" : "Local"
         } → ${faviconPath}`
       );
 
@@ -206,28 +203,24 @@ export const update = async (req: Request, res: Response) => {
 
     const logoPath = logoFile
       ? logoFile.cloudUrl ||
-        `/uploads/${path.basename(path.dirname(logoFile.path))}/${
-          logoFile.filename
-        }`
+      `/uploads/${path.basename(path.dirname(logoFile.path))}/${logoFile.filename
+      }`
       : parsed.logo;
 
     const faviconPath = faviconFile
       ? faviconFile.cloudUrl ||
-        `/uploads/${path.basename(path.dirname(faviconFile.path))}/${
-          faviconFile.filename
-        }`
+      `/uploads/${path.basename(path.dirname(faviconFile.path))}/${faviconFile.filename
+      }`
       : parsed.favicon;
 
     if (logoFile)
       console.log(
-        `🖼️ Updating logo: ${
-          logoFile.cloudUrl ? "Cloud" : "Local"
+        `🖼️ Updating logo: ${logoFile.cloudUrl ? "Cloud" : "Local"
         } → ${logoPath}`
       );
     if (faviconFile)
       console.log(
-        `🌐 Updating favicon: ${
-          faviconFile.cloudUrl ? "Cloud" : "Local"
+        `🌐 Updating favicon: ${faviconFile.cloudUrl ? "Cloud" : "Local"
         } → ${faviconPath}`
       );
 
@@ -267,12 +260,20 @@ export const getBrandSettings = async (_req: Request, res: Response) => {
         title: "Your App Name",
         tagline: "Building amazing experiences",
         logo: "",
-        logo2:"",
+        logo2: "",
         favicon: "",
         supportEmail: "",
         updatedAt: new Date().toISOString(),
       });
     }
+
+    // Helper to resolve logo/favicon path without doubling /uploads/
+    const resolvePath = (val?: string | null) => {
+      if (!val) return "";
+      if (val.startsWith("https") || val.startsWith("http")) return val;
+      if (val.startsWith("/")) return val; // Already has leading slash (e.g. /uploads/...)
+      return `/uploads/${val}`;
+    };
 
     // Transform panel config to brand settings format
     const brandSettings = {
@@ -281,15 +282,9 @@ export const getBrandSettings = async (_req: Request, res: Response) => {
       currency: config.currency || "",
       country: config.country || "",
       supportEmail: config.supportEmail || "",
-      logo: config.logo?.startsWith("https")
-        ? config.logo
-        : `/uploads/${config.logo}`,
-      logo2: config.logo2?.startsWith("https")
-        ? config.logo2
-        : `/uploads/${config.logo2}`,  
-      favicon: config.favicon?.startsWith("https")
-        ? config.favicon
-        : `/uploads/${config.favicon}`,
+      logo: resolvePath(config.logo),
+      logo2: resolvePath(config.logo2),
+      favicon: resolvePath(config.favicon),
       updatedAt: config.updatedAt?.toISOString() || new Date().toISOString(),
     };
 
@@ -318,8 +313,7 @@ export const createBrandSettings = async (req: Request, res: Response) => {
       const isCloudFile = !!logoFile.cloudUrl;
       logoPath =
         logoFile.cloudUrl ||
-        `/uploads/${path.basename(path.dirname(logoFile.path))}/${
-          logoFile.filename
+        `/uploads/${path.basename(path.dirname(logoFile.path))}/${logoFile.filename
         }`;
       console.log(`🖼️ Logo (${isCloudFile ? "Cloud" : "Local"}): ${logoPath}`);
     } else if (parsed.logo && parsed.logo.includes("base64,")) {
@@ -345,8 +339,7 @@ export const createBrandSettings = async (req: Request, res: Response) => {
       const isCloudFile = !!faviconFile.cloudUrl;
       faviconPath =
         faviconFile.cloudUrl ||
-        `/uploads/${path.basename(path.dirname(faviconFile.path))}/${
-          faviconFile.filename
+        `/uploads/${path.basename(path.dirname(faviconFile.path))}/${faviconFile.filename
         }`;
       console.log(
         `🌐 Favicon (${isCloudFile ? "Cloud" : "Local"}): ${faviconPath}`
@@ -529,21 +522,22 @@ export const updateBrandSettings = async (req: Request, res: Response) => {
     // =============================
     // ✅ 5. Response (Frontend format)
     // =============================
+    const resolvePath = (val?: string | null) => {
+      if (!val) return "";
+      if (val.startsWith("https") || val.startsWith("http")) return val;
+      if (val.startsWith("/")) return val;
+      return `/uploads/${val}`;
+    };
+
     const brandSettings = {
       title: config.name || parsed.title,
       tagline: config.tagline || "",
       country: config.country || "",
       currency: config.currency || "",
       supportEmail: config.supportEmail || "",
-      logo: config.logo?.startsWith("https")
-        ? config.logo
-        : `/uploads/${config.logo}`,
-      logo2: config.logo2?.startsWith("https")
-        ? config.logo2
-        : `/uploads/${config.logo2}`, // 👈 ADDED
-      favicon: config.favicon?.startsWith("https")
-        ? config.favicon
-        : `/uploads/${config.favicon}`,
+      logo: resolvePath(config.logo),
+      logo2: resolvePath(config.logo2),
+      favicon: resolvePath(config.favicon),
       updatedAt: config.updatedAt?.toISOString() || new Date().toISOString(),
     };
 
