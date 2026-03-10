@@ -20,7 +20,8 @@ import { diployLogger, HTTP_STATUS, DIPLOY_BRAND } from "@diploy/core";
 import {
   getSMTPConfigHandler,
   upsertSMTPConfig,
-  sendMailRoute
+  sendMailRoute,
+  sendTestEmailHandler,
 } from "../controllers/smtp.controller";
 import { upload, handleDigitalOceanUpload } from "../middlewares/upload.middleware";
 import type { Express } from "express";
@@ -30,7 +31,7 @@ export function registerSMTPRoutes(app: Express) {
   app.post("/api/admin/smtpConfig", requireAuth, upsertSMTPConfig);
 
   // Get SMTP Config
-  app.get("/api/admin/getSmtpConfig", requireAuth, getSMTPConfigHandler);  
+  app.get("/api/admin/getSmtpConfig", requireAuth, getSMTPConfigHandler);
 
   app.post("/api/admin/smtp/upload-logo", requireAuth, requireRole("superadmin"), upload.single('logo'), handleDigitalOceanUpload, async (req, res) => {
     try {
@@ -46,4 +47,7 @@ export function registerSMTPRoutes(app: Express) {
   });
 
   app.post("/api/contact/sendmail", sendMailRoute);
+
+  // Test SMTP by sending a real email
+  app.post("/api/admin/smtp/test-email", requireAuth, requireRole("superadmin"), sendTestEmailHandler);
 }

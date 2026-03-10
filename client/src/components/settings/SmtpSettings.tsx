@@ -1,20 +1,3 @@
-/**
- * ============================================================
- * © 2025 Diploy — a brand of Bisht Technologies Private Limited
- * Original Author: BTPL Engineering Team
- * Website: https://diploy.in
- * Contact: cs@diploy.in
- *
- * Distributed under the Envato / CodeCanyon License Agreement.
- * Licensed to the purchaser for use as defined by the
- * Envato Market (CodeCanyon) Regular or Extended License.
- *
- * You are NOT permitted to redistribute, resell, sublicense,
- * or share this source code, in whole or in part.
- * Respect the author's rights and Envato licensing terms.
- * ============================================================
- */
-
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -27,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Server,
   Edit,
@@ -41,6 +25,8 @@ import {
   Clock,
   Image as ImageIcon,
   User,
+  SendHorizonal,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Loading } from "@/components/ui/loading";
@@ -62,6 +48,9 @@ interface SMTPConfig {
 
 export default function SMTPSettings() {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -97,11 +86,38 @@ export default function SMTPSettings() {
   const displayData = error ? staticData : smtpConfig || {};
   const isUsingStaticData = Boolean(error);
 
-
   const formatLastUpdated = (d?: string) => {
     if (!d) return "Unknown";
     const date = new Date(d);
     return date.toLocaleString();
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!testEmail.trim()) {
+      toast({ title: "Enter an email address", variant: "destructive" });
+      return;
+    }
+    setIsSendingTest(true);
+    setTestResult(null);
+    try {
+      const res = await fetch("/api/admin/smtp/test-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: testEmail.trim() }),
+      });
+      const data = await res.json();
+      setTestResult({ success: data.success, message: data.message });
+      toast({
+        title: data.success ? "✅ Test Email Sent!" : "❌ Test Failed",
+        description: data.message,
+        variant: data.success ? "default" : "destructive",
+      });
+    } catch (err: any) {
+      setTestResult({ success: false, message: "Network error — could not reach the server" });
+      toast({ title: "Error", description: "Network error", variant: "destructive" });
+    } finally {
+      setIsSendingTest(false);
+    }
   };
 
   if (isLoading) {
@@ -154,14 +170,13 @@ export default function SMTPSettings() {
               </Button>
 
               <Button
-  size="sm"
-  onClick={() => setShowEditDialog(true)}
-  className="text-xs"
->
-  <Edit className="w-4 h-4 mr-2" />
-  Edit SMTP
-</Button>
-
+                size="sm"
+                onClick={() => setShowEditDialog(true)}
+                className="text-xs"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit SMTP
+              </Button>
             </div>
           </div>
 
@@ -169,20 +184,6 @@ export default function SMTPSettings() {
         </CardHeader>
 
         <CardContent>
-          {/* {isUsingStaticData && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg mb-6">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600" />
-                <div>
-                  <p className="font-semibold text-red-800">Connection Error</p>
-                  <p className="text-sm text-red-700">
-                    Showing cached SMTP configuration.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )} */}
-
           <div className="border p-6 rounded-lg">
             <div className="flex justify-between mb-6">
               <h3 className="text-lg font-semibold">SMTP Details</h3>
@@ -196,7 +197,6 @@ export default function SMTPSettings() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* host */}
               <div>
                 <Label className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-blue-500" /> SMTP Host
@@ -206,7 +206,6 @@ export default function SMTPSettings() {
                 </p>
               </div>
 
-              {/* port */}
               <div>
                 <Label className="flex items-center gap-2">
                   <Server className="w-4 h-4 text-purple-500" /> Port
@@ -216,7 +215,6 @@ export default function SMTPSettings() {
                 </p>
               </div>
 
-              {/* secure */}
               <div>
                 <Label className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-green-600" /> Secure (TLS)
@@ -226,7 +224,6 @@ export default function SMTPSettings() {
                 </p>
               </div>
 
-              {/* user */}
               <div>
                 <Label className="flex items-center gap-2">
                   <User className="w-4 h-4 text-orange-600" /> SMTP User
@@ -236,7 +233,6 @@ export default function SMTPSettings() {
                 </p>
               </div>
 
-              {/* from name */}
               <div>
                 <Label className="flex items-center gap-2">
                   <User className="w-4 h-4 text-indigo-600" /> From Name
@@ -246,7 +242,6 @@ export default function SMTPSettings() {
                 </p>
               </div>
 
-              {/* from email */}
               <div>
                 <Label className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-red-600" /> From Email
@@ -256,7 +251,6 @@ export default function SMTPSettings() {
                 </p>
               </div>
 
-              {/* logo */}
               <div className="md:col-span-2">
                 <Label className="flex items-center gap-2">
                   <ImageIcon className="w-4 h-4 text-yellow-600" /> Logo
@@ -281,6 +275,66 @@ export default function SMTPSettings() {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* TEST EMAIL CARD */}
+      <Card className="border-dashed border-2 border-green-200 bg-green-50/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SendHorizonal className="w-5 h-5 text-green-600" />
+            Send Test Email
+          </CardTitle>
+          <CardDescription>
+            Verify your SMTP configuration by sending a real test email right now
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+            <div className="flex-1 w-full">
+              <Label className="text-sm font-medium mb-1.5 block">Recipient Email Address</Label>
+              <Input
+                type="email"
+                placeholder="e.g. admin@chatvoo.com"
+                value={testEmail}
+                onChange={(e) => {
+                  setTestEmail(e.target.value);
+                  setTestResult(null);
+                }}
+                onKeyDown={(e) => e.key === "Enter" && handleSendTestEmail()}
+                className="w-full"
+              />
+            </div>
+            <Button
+              onClick={handleSendTestEmail}
+              disabled={isSendingTest || !testEmail.trim()}
+              className="bg-green-600 hover:bg-green-700 text-white shrink-0"
+            >
+              {isSendingTest ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</>
+              ) : (
+                <><SendHorizonal className="w-4 h-4 mr-2" /> Send Test Email</>
+              )}
+            </Button>
+          </div>
+
+          {/* Result feedback */}
+          {testResult && (
+            <div className={`mt-4 flex items-start gap-3 p-4 rounded-lg border ${testResult.success
+                ? "bg-green-50 border-green-200 text-green-800"
+                : "bg-red-50 border-red-200 text-red-800"
+              }`}>
+              {testResult.success
+                ? <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+                : <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />}
+              <div>
+                <p className="font-semibold text-sm">
+                  {testResult.success ? "Email sent successfully!" : "Send failed"}
+                </p>
+                <p className="text-sm mt-0.5">{testResult.message}</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
