@@ -395,6 +395,12 @@ const sidebarItemsCategories = [
     path: "/support-tickets",
     color: "text-black-400",
   },
+  {
+    name: "navigation.operational_settings",
+    icon: Settings,
+    path: "/admin-settings",
+    color: "text-red-600",
+  },
 ];
 
 // Category-based structure for superadmin

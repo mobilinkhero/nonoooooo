@@ -59,10 +59,14 @@ import { registerTrainingRoutes } from "./training.routes";
 import { registerLanguageRoutes } from "./language.routes";
 import { registerClientApiRoutes } from "./client-api.routes";
 import { registerRestApiV1Routes } from "./rest-api-v1.routes";
+import adminManagementRoutes from "./admin.management.routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes (no authentication required)
   app.use("/api/auth", authRoutes);
+
+  // Admin Management routes
+  app.use("/api/admin/management", adminManagementRoutes);
 
   // Register all route modules
   registerWidgetRoutes(app);

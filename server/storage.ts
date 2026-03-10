@@ -43,6 +43,12 @@ import {
   type InsertMessageQueue,
   type ApiLog,
   type InsertApiLog,
+  type AdminAuditLog,
+  type InsertAdminAuditLog,
+  type Coupon,
+  type InsertCoupon,
+  type SystemSetting,
+  type InsertSystemSetting,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -55,7 +61,7 @@ export interface IStorage {
 
   // Contacts
   getContacts(): Promise<Contact[]>;
-  getContactsByUser(userId: String): Promise<Contact[]>;
+  getContactsByUser(userId: string, page?: number, limit?: number): Promise<any>;
   getContactsByChannel(channelId: string): Promise<Contact[]>;
   getContact(id: string): Promise<Contact | undefined>;
   getContactByPhone(phone: string): Promise<Contact | undefined>;
@@ -78,10 +84,10 @@ export interface IStorage {
   deleteCannedResponse(id: string): Promise<boolean>;
 
   // Campaigns
-  getCampaigns(): Promise<Campaign[]>;
+  getCampaigns(page?: number, limit?: number): Promise<any>;
   getScheduledCampaigns(now: Date): Promise<Campaign[]>;
-  getCampaignByUserId(userId: string): Promise<Campaign[]>;
-  getCampaignsByChannel(channelId: string): Promise<Campaign[]>;
+  getCampaignByUserId(userId: string, page?: number, limit?: number): Promise<any>;
+  getCampaignsByChannel(channelId: string, page?: number, limit?: number): Promise<any>;
   getCampaign(id: string): Promise<Campaign | undefined>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaign(id: string, campaign: Partial<Campaign>): Promise<Campaign | undefined>;
@@ -90,8 +96,8 @@ export interface IStorage {
   deleteCampaign(id: string): Promise<boolean>;
 
   // Templates
-  getTemplates(): Promise<Template[]>;
-  getTemplatesByChannel(channelId: string): Promise<Template[]>;
+  getTemplates(page?: number, limit?: number): Promise<any>;
+  getTemplatesByChannel(channelId: string, page?: number, limit?: number): Promise<any>;
   getTemplate(id: string): Promise<Template | undefined>;
   createTemplate(template: InsertTemplate): Promise<Template>;
   updateTemplate(id: string, template: Partial<Template>): Promise<Template | undefined>;
@@ -134,15 +140,7 @@ export interface IStorage {
     campaignsRunning: number;
     unreadChats: number;
   }>;
-  getDashboardStatsByChannel(channelId: string): Promise<{
-    totalMessages: number;
-    activeCampaigns: number;
-    deliveryRate: number;
-    newLeads: number;
-    messagesGrowth: number;
-    campaignsRunning: number;
-    unreadChats: number;
-  }>;
+  getDashboardStatsByChannel(channelId: string, userId: string): Promise<any>;
 
   // Channels
   getChannels(): Promise<Channel[]>;
@@ -187,16 +185,46 @@ export interface IStorage {
   getWhatsappChannels(): Promise<WhatsappChannel[]>;
   deleteWhatsappChannel(id: string): Promise<void>;
   getMessageQueue(): Promise<MessageQueue>;
-  // getQueuedMessages(): Promise<Message[]>;
-
-  getCampaignsByChannel(channelId: string): Promise<Campaign[]>;
-  getTemplatesByChannel(channelId: string): Promise<Template[]>;
-  getTemplatesByUserId(userId: string): Promise<Template[]>;
+  // getQueu  getTemplates(page?: number, limit?: number): Promise<any>;
+  getTemplate(id: string): Promise<Template | undefined>;
+  getTemplatesByChannel(channelId: string, page?: number, limit?: number): Promise<any>;
+  getTemplatesByUserId(userId: string, page?: number, limit?: number): Promise<any>;
   getTemplatesByChannelAndUser(channelId: string, userId: string): Promise<Template[]>;
   getConversationsByChannel(channelId: string): Promise<Conversation[]>;
   deleteConversation(id: string): Promise<boolean>;
-  getAutomationByChannel(channelId: string): Promise<Automation[]>;
   getAnalyticsByChannel(channelId: string, days?: number): Promise<Analytics[]>;
+  getPermissions(id: string): Promise<string[] | undefined>;
+  getUnreadConversationsCount(): Promise<number>;
+  getConversationMessages(conversationId: string): Promise<any>;
+  getChannelsByUserId(userId: string): Promise<Channel[]>;
+  getActiveChannelByUserId(userId: string): Promise<Channel | undefined>;
+  createBulkContacts(contacts: InsertContact[]): Promise<Contact[]>;
+  checkExistingPhones(phones: string[], channelId: string): Promise<string[]>;
+  createBulkMessageQueue(messages: InsertMessageQueue[]): Promise<MessageQueue[]>;
+  updateMessageQueueItem(id: string, updates: Partial<MessageQueue>): Promise<MessageQueue | undefined>;
+  updateMessageQueueByWhatsAppId(whatsappMessageId: string, updates: Partial<MessageQueue>): Promise<boolean>;
+  getMessageQueueByCampaign(campaignId: string): Promise<MessageQueue[]>;
+  getMessageQueueByChannel(channelId: string): Promise<MessageQueue[]>;
+  getPendingMessages(): Promise<MessageQueue[]>;
+  createApiLog(log: InsertApiLog): Promise<ApiLog>;
+
+  // Admin Management
+  getAdminAuditLogs(limit?: number): Promise<AdminAuditLog[]>;
+  createAdminAuditLog(log: InsertAdminAuditLog): Promise<AdminAuditLog>;
+
+  getCoupons(): Promise<Coupon[]>;
+  getCouponByCode(code: string): Promise<Coupon | undefined>;
+  createCoupon(coupon: InsertCoupon): Promise<Coupon>;
+  deleteCoupon(id: string): Promise<void>;
+
+  getSystemSetting(key: string): Promise<SystemSetting | undefined>;
+  updateSystemSetting(key: string, value: any): Promise<SystemSetting>;
+
+  searchGlobal(query: string): Promise<{
+    users: User[];
+    channels: Channel[];
+    transactions: any[];
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -1101,6 +1129,20 @@ export class MemStorage implements IStorage {
       return null;
     }
   }
+
+  // MemStorage Placeholders for Admin Management
+  async getAdminAuditLogs(limit: number = 50): Promise<AdminAuditLog[]> { return []; }
+  async createAdminAuditLog(log: InsertAdminAuditLog): Promise<AdminAuditLog> { return {} as AdminAuditLog; }
+  async getCoupons(): Promise<Coupon[]> { return []; }
+  async getCouponByCode(code: string): Promise<Coupon | undefined> { return undefined; }
+  async createCoupon(coupon: InsertCoupon): Promise<Coupon> { return {} as Coupon; }
+  async deleteCoupon(id: string): Promise<void> { }
+  async getSystemSetting(key: string): Promise<SystemSetting | undefined> { return undefined; }
+  async updateSystemSetting(key: string, value: any): Promise<SystemSetting> { return {} as SystemSetting; }
+  async searchGlobal(query: string): Promise<{ users: User[]; channels: Channel[]; transactions: any[]; }> {
+    return { users: [], channels: [], transactions: [] };
+  }
+  async getTemplatesByUserId(userId: string): Promise<Template[]> { return []; }
 }
 
 // export const storage = new MemStorage();

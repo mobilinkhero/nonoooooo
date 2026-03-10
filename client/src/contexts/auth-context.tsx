@@ -32,7 +32,12 @@ interface User {
   permissions: string[];
   avatar?: string;
   createdAt?: string;
-  
+  isImpersonating?: boolean;
+  originalAdmin?: {
+    id: string;
+    username: string;
+    role: string;
+  } | null;
 }
 
 interface BrandSettings {
@@ -53,7 +58,7 @@ interface AuthContextType {
   currency: string; // Direct access to currency
   logout: () => void;
   currencySymbol: string | undefined;
-  userPlans: any[];  
+  userPlans: any[];
   isUserPlansLoading: boolean;
 }
 
@@ -85,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
 
-const {
+  const {
     data: userPlans,
     isLoading: isUserPlansLoading
   } = useQuery<SubscriptionResponse>({
@@ -158,7 +163,7 @@ const {
         currency: brandSettings?.currency || "INR",
         currencySymbol: currency?.symbol,
         logout,
-        userPlans: userPlans || [],
+        userPlans: userPlans?.data || [],
         isUserPlansLoading,
 
       }}

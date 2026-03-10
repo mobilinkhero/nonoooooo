@@ -20,14 +20,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FaEllipsisH, FaEye, FaBan, FaSearch, FaCheck, FaCrown, FaEdit, FaFileExport } from "react-icons/fa";
+import { FaEllipsisH, FaEye, FaBan, FaSearch, FaCheck, FaCrown, FaEdit, FaFileExport, FaUserShield } from "react-icons/fa";
 import EditUserModal from "@/components/modals/EditUserModal";
 import { PageNumbers } from "@/components/ui/page-numbers";
 import Header from "@/components/layout/header";
 import { Link } from "wouter";
 import { useTranslation } from "@/lib/i18n";
 import { useAuth } from "@/contexts/auth-context";
-import {isDemoUser, maskValue, maskPhone, maskName, maskEmail } from "@/utils/maskUtils";
+import { isDemoUser, maskValue, maskPhone, maskName, maskEmail } from "@/utils/maskUtils";
 import AddUserModal from "@/components/modals/AddUserModal";
 import AssignPlanModal from "@/components/modals/AssignPlanModal";
 
@@ -136,9 +136,9 @@ const User: React.FC = () => {
   };
 
 
-  
-  
-  
+
+
+
 
   const fetchUsers = async (
     page = 1,
@@ -243,90 +243,90 @@ const User: React.FC = () => {
 
 
 
-const fetchPlans = async () => {
-  try {
-    const response = await apiRequest("GET", "/api/admin/plans");
-    const data = await response.json();
-    if (data.success) {
-      setPlans(data.data);
-    }
-  } catch (err) {
-    console.error("Plan fetch error:", err);
-  }
-};
-
-useEffect(() => {
-  fetchPlans();
-}, []);
-
-const openAssignPlanModal = (user: any) => {
-  setSelectedUserForPlan(user);
-  setAssignModalOpen(true);
-};
-
-const [exporting, setExporting] = useState(false);
-
-const handleExportCSV = async () => {
-  try {
-    setExporting(true);
-    const exportParams = new URLSearchParams();
-    if (search) exportParams.set("search", search);
-    if (statusFilter) exportParams.set("status", statusFilter);
-    if (hasChannelsFilter) exportParams.set("hasChannels", hasChannelsFilter);
-    if (dateRangeFilter) exportParams.set("dateRange", dateRangeFilter);
-    const response = await apiRequest("GET", `/api/admin/users/export?${exportParams.toString()}`);
-    const data = await response.json();
-    if (!data.success || !data.data) {
-      toast({ title: t("users.toast.error"), description: "Export failed", variant: "destructive" });
-      return;
-    }
-    const exportUsers = data.data;
-    const headers = ["Username", "Email", "First Name", "Last Name", "Role", "Status", "Channels Count", "Channel Names", "Last Login", "Created At"];
-    const escapeCSV = (val: string) => {
-      if (!val) return "";
-      const str = String(val);
-      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-        return `"${str.replace(/"/g, '""')}"`;
+  const fetchPlans = async () => {
+    try {
+      const response = await apiRequest("GET", "/api/admin/plans");
+      const data = await response.json();
+      if (data.success) {
+        setPlans(data.data);
       }
-      return str;
-    };
-    const _demo = isDemoUser(user?.username);
-    const rows = exportUsers.map((u: any) => [
-      escapeCSV(_demo ? maskName(u.username) : u.username),
-      escapeCSV(_demo ? maskEmail(u.email) : u.email),
-      escapeCSV(_demo ? maskName(u.firstName || "") : (u.firstName || "")),
-      escapeCSV(_demo ? maskName(u.lastName || "") : (u.lastName || "")),
-      escapeCSV(u.role || ""),
-      escapeCSV(u.status || ""),
-      String(u.channelCount ?? 0),
-      escapeCSV(_demo ? "***" : (u.channelNames || "")),
-      u.lastLogin ? formatDateTime(u.lastLogin) : "Never",
-      u.createdAt ? formatDateTime(u.createdAt) : "",
-    ].join(","));
-    const csv = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `users_export_${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast({ title: t("users.toast.success"), description: `Exported ${exportUsers.length} users` });
-  } catch (error) {
-    toast({ title: t("users.toast.error"), description: "Export failed", variant: "destructive" });
-  } finally {
-    setExporting(false);
-  }
-};
+    } catch (err) {
+      console.error("Plan fetch error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const openAssignPlanModal = (user: any) => {
+    setSelectedUserForPlan(user);
+    setAssignModalOpen(true);
+  };
+
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportCSV = async () => {
+    try {
+      setExporting(true);
+      const exportParams = new URLSearchParams();
+      if (search) exportParams.set("search", search);
+      if (statusFilter) exportParams.set("status", statusFilter);
+      if (hasChannelsFilter) exportParams.set("hasChannels", hasChannelsFilter);
+      if (dateRangeFilter) exportParams.set("dateRange", dateRangeFilter);
+      const response = await apiRequest("GET", `/api/admin/users/export?${exportParams.toString()}`);
+      const data = await response.json();
+      if (!data.success || !data.data) {
+        toast({ title: t("users.toast.error"), description: "Export failed", variant: "destructive" });
+        return;
+      }
+      const exportUsers = data.data;
+      const headers = ["Username", "Email", "First Name", "Last Name", "Role", "Status", "Channels Count", "Channel Names", "Last Login", "Created At"];
+      const escapeCSV = (val: string) => {
+        if (!val) return "";
+        const str = String(val);
+        if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+      const _demo = isDemoUser(user?.username);
+      const rows = exportUsers.map((u: any) => [
+        escapeCSV(_demo ? maskName(u.username) : u.username),
+        escapeCSV(_demo ? maskEmail(u.email) : u.email),
+        escapeCSV(_demo ? maskName(u.firstName || "") : (u.firstName || "")),
+        escapeCSV(_demo ? maskName(u.lastName || "") : (u.lastName || "")),
+        escapeCSV(u.role || ""),
+        escapeCSV(u.status || ""),
+        String(u.channelCount ?? 0),
+        escapeCSV(_demo ? "***" : (u.channelNames || "")),
+        u.lastLogin ? formatDateTime(u.lastLogin) : "Never",
+        u.createdAt ? formatDateTime(u.createdAt) : "",
+      ].join(","));
+      const csv = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `users_export_${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast({ title: t("users.toast.success"), description: `Exported ${exportUsers.length} users` });
+    } catch (error) {
+      toast({ title: t("users.toast.error"), description: "Export failed", variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dots-bg">
-      <Header title={t("users.title")} subtitle={t("users.subtitle")}  action={{
-    label: "Add New User",
-    onClick: () => setOpenAddModal(true),
-  }}  />
+      <Header title={t("users.title")} subtitle={t("users.subtitle")} action={{
+        label: "Add New User",
+        onClick: () => setOpenAddModal(true),
+      }} />
 
       <div className="p-4 md:p-6">
         {/* Search */}
@@ -588,12 +588,12 @@ const handleExportCSV = async () => {
                           <FaEye className="cursor-pointer hover:text-green-600" />
                         </Link>
 
-                         {/* PLAN ASSIGN DROPDOWN */}
-   <FaCrown
-  onClick={() => openAssignPlanModal(u)}
-  className="cursor-pointer text-yellow-500 hover:text-yellow-600"
-  title="Assign Plan"
-/>
+                        {/* PLAN ASSIGN DROPDOWN */}
+                        <FaCrown
+                          onClick={() => openAssignPlanModal(u)}
+                          className="cursor-pointer text-yellow-500 hover:text-yellow-600"
+                          title="Assign Plan"
+                        />
 
                         {u.status === "active" ? (
                           <FaBan
@@ -608,6 +608,19 @@ const handleExportCSV = async () => {
                             title={t("users.actions.activateUser")}
                           />
                         )}
+                        <FaUserShield
+                          onClick={async () => {
+                            if (window.confirm(`Login as ${u.username}?`)) {
+                              try {
+                                const resp = await fetch(`/api/admin/management/impersonate/${u.id}`, { method: 'POST' });
+                                if (resp.ok) window.location.href = "/dashboard";
+                                else alert("Failed to impersonate");
+                              } catch (err) { console.error(err); }
+                            }
+                          }}
+                          className="cursor-pointer hover:text-indigo-600"
+                          title="Login as User"
+                        />
                       </div>
                     </td>
                   </tr>
@@ -680,9 +693,8 @@ const handleExportCSV = async () => {
                   <p>
                     <strong>{t("users.card.status")}</strong>{" "}
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        statusColors[u.status.toLowerCase()]
-                      }`}
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColors[u.status.toLowerCase()]
+                        }`}
                     >
                       {u.status.toUpperCase()}
                     </span>
@@ -707,6 +719,19 @@ const handleExportCSV = async () => {
                   <Link href={`/users/${u.id}`}>
                     <FaEye className="cursor-pointer hover:text-green-600" />
                   </Link>
+                  <FaUserShield
+                    onClick={async () => {
+                      if (window.confirm(`Login as ${u.username}?`)) {
+                        try {
+                          const resp = await fetch(`/api/admin/management/impersonate/${u.id}`, { method: 'POST' });
+                          if (resp.ok) window.location.href = "/dashboard";
+                          else alert("Failed to impersonate");
+                        } catch (err) { console.error(err); }
+                      }
+                    }}
+                    className="cursor-pointer hover:text-indigo-600 text-lg"
+                    title="Login as User"
+                  />
                   {u.status === "active" ? (
                     <FaBan
                       onClick={() => handleToggleStatus(u)}
@@ -785,27 +810,27 @@ const handleExportCSV = async () => {
       </div>
 
       <AddUserModal
-  open={openAddModal}
-  onOpenChange={setOpenAddModal}
-  onSuccess={() => fetchUsers()}
-/>
+        open={openAddModal}
+        onOpenChange={setOpenAddModal}
+        onSuccess={() => fetchUsers()}
+      />
 
 
-<AssignPlanModal
-  open={assignModalOpen}
-  onOpenChange={setAssignModalOpen}
-  user={selectedUserForPlan}
-  plans={plans}
-  subscriptions={userPlans}  
-  onSuccess={fetchUsers}
-/>
+      <AssignPlanModal
+        open={assignModalOpen}
+        onOpenChange={setAssignModalOpen}
+        user={selectedUserForPlan}
+        plans={plans}
+        subscriptions={userPlans}
+        onSuccess={fetchUsers}
+      />
 
-<EditUserModal
-  open={editModalOpen}
-  onOpenChange={setEditModalOpen}
-  user={selectedUserForEdit}
-  onSuccess={() => fetchUsers(pagination.page, search, pagination.limit)}
-/>
+      <EditUserModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        user={selectedUserForEdit}
+        onSuccess={() => fetchUsers(pagination.page, search, pagination.limit)}
+      />
 
     </div>
   );

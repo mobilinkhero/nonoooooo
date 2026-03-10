@@ -25,7 +25,7 @@ import bcrypt from "bcryptjs";
 import { validateRequest } from "../middlewares/validateRequest.middleware";
 import { resolveUserPermissions } from "server/utils/role-permissions";
 import country from "../config/country.json"
-import {sendOTPEmail} from "../services/email.service"
+import { sendOTPEmail } from "../services/email.service"
 import { otpVerifications } from "@shared/schema";
 
 
@@ -51,7 +51,7 @@ router.post("/login", validateRequest(loginSchema), async (req, res) => {
       .from(users)
       .where(eq(users.username, username));
 
-      console.log(results)
+    console.log(results)
 
     const user = results[0];
 
@@ -64,13 +64,13 @@ router.post("/login", validateRequest(loginSchema), async (req, res) => {
 
     // Check if user is active
     if ((user.status || "").trim().toLowerCase() !== "active") {
-  return res.status(403).json({ error: "Account is inactive. Please contact administrator." });
-}
+      return res.status(403).json({ error: "Account is inactive. Please contact administrator." });
+    }
 
     // Check if email is verified
-if (user.isEmailVerified === false) {
-  return res.status(403).json({ error: "Email not verified. Please verify your email first." });
-}
+    if (user.isEmailVerified === false) {
+      return res.status(403).json({ error: "Email not verified. Please verify your email first." });
+    }
 
     // Ensure password field exists
     if (!user.password) {
@@ -175,7 +175,7 @@ router.post("/logout", (req, res) => {
 router.get("/me", async (req, res) => {
   // console.log("Fetching current user" , req.session);
   const user = (req as any).session?.user;
-// console.log("Session user:", user);
+  // console.log("Session user:", user);
   if (!user) {
     return res.status(401).json({ error: "Not authenticated" });
   }
@@ -192,7 +192,15 @@ router.get("/me", async (req, res) => {
 
   // Remove password from response
   const { password, ...userData } = currentUser;
-  res.json(userData);
+
+  // Add impersonation info if active
+  const originalAdmin = (req as any).session?.originalAdmin;
+
+  res.json({
+    ...userData,
+    isImpersonating: !!originalAdmin,
+    originalAdmin: originalAdmin || null,
+  });
 });
 
 // Check if authenticated (for frontend)

@@ -1772,3 +1772,51 @@ export const cannedResponsesRelations = relations(cannedResponses, ({ one }) => 
 }));
 
 export const insertCannedResponseSchema = createInsertSchema(cannedResponses);
+
+// Admin Audit Logs
+export const adminAuditLogs = pgTable("admin_audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adminId: varchar("admin_id").notNull(),
+  adminUsername: text("admin_username").notNull(),
+  action: text("action").notNull(), // 'USER_UPDATE', 'PLAN_DELETE', 'TRANSACTION_REFUND', etc.
+  targetId: varchar("target_id").default(""),
+  details: jsonb("details").default({}),
+  ipAddress: text("ip_address"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Coupons / Discount Engine
+export const coupons = pgTable("coupons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  discountType: varchar("discount_type", { length: 20 }).notNull(), // 'percentage' or 'fixed'
+  discountValue: numeric("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minPurchaseAmount: numeric("min_purchase_amount", { precision: 10, scale: 2 }).default("0"),
+  maxDiscountAmount: numeric("max_discount_amount", { precision: 10, scale: 2 }),
+  expiresAt: timestamp("expires_at"),
+  usageLimit: integer("usage_limit"),
+  usageCount: integer("usage_count").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Global System Settings (Maintenance Mode, etc.)
+export const systemSettings = pgTable("system_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  isMaintenanceMode: boolean("is_maintenance_mode").default(false),
+  maintenanceMessage: text("maintenance_message").default("Our system is currently undergoing scheduled maintenance. We'll be back shortly!"),
+  supportEmail: text("support_email"),
+  updatedBy: varchar("updated_by"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAdminAuditLogSchema = createInsertSchema(adminAuditLogs);
+export const insertCouponSchema = createInsertSchema(coupons);
+export const insertSystemSettingsSchema = createInsertSchema(systemSettings);
+
+export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
+export type InsertAdminAuditLog = typeof adminAuditLogs.$inferInsert;
+export type Coupon = typeof coupons.$inferSelect;
+export type InsertCoupon = typeof coupons.$inferInsert;
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = typeof systemSettings.$inferInsert;

@@ -58,10 +58,22 @@ import {
   type InsertMessageQueue,
   type ApiLog,
   type InsertApiLog,
+  type AdminAuditLog,
+  type InsertAdminAuditLog,
+  type Coupon,
+  type InsertCoupon,
+  type SystemSetting,
+  type InsertSystemSetting,
   type Site,
   type InsertSite,
   sites,
   trainingQaPairs,
+  adminAuditLogs,
+  coupons,
+  systemSettings,
+  users,
+  channels,
+  transactions,
 } from "@shared/schema";
 import { db } from "./db";
 import { desc, eq } from "drizzle-orm";
@@ -928,6 +940,104 @@ export class DatabaseStorage implements IStorage {
       totalTeamMembers,
       totalTemplatesByUserId: totalTemplatesByUserId.total,
       ...messageStats,
+    };
+  }
+
+  // Admin Management Implementation
+  async getAdminAuditLogs(limit: number = 50): Promise<AdminAuditLog[]> {
+    return await db.select().from(adminAuditLogs).orderBy(desc(adminAuditLogs.createdAt)).limit(limit);
+  }
+
+  async createAdminAuditLog(log: InsertAdminAuditLog): Promise<AdminAuditLog> {
+    const [auditLog] = await db.insert(adminAuditLogs).values(log).returning();
+    return auditLog;
+  }
+
+  async getCoupons(): Promise<Coupon[]> {
+    return await db.select().from(coupons).orderBy(desc(coupons.createdAt));
+  }
+
+  async getCouponByCode(code: string): Promise<Coupon | undefined> {
+    const [coupon] = await db.select().from(coupons).where(eq(coupons.code, code.toUpperCase()));
+    return coupon;
+  }
+
+  async createCoupon(coupon: InsertCoupon): Promise<Coupon> {
+    const [newCoupon] = await db.insert(coupons).values({
+      ...coupon,
+      code: coupon.code.toUpperCase()
+    }).returning();
+    return newCoupon;
+  }
+
+  async deleteCoupon(id: string): Promise<void> {
+    await db.delete(coupons).where(eq(coupons.id, id));
+  }
+
+  async getSystemSetting(key: string): Promise<SystemSetting | undefined> {
+    const [setting] = await db.select().from(systemSettings).limit(1);
+    return setting;
+  }
+
+  async updateSystemSetting(key: string, value: any): Promise<SystemSetting> {
+    const existing = await this.getSystemSetting("config");
+    if (existing) {
+      const field = key === 'maintenance_mode' ? 'isMaintenanceMode' :
+        key === 'maintenance_message' ? 'maintenanceMessage' :
+          key === 'support_email' ? 'supportEmail' : null;
+
+      if (!field) throw new Error("Invalid system setting key");
+
+      const [updated] = await db.update(systemSettings)
+        .set({ [field]: value, updatedAt: new Date() })
+        .where(eq(systemSettings.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const field = key === 'maintenance_mode' ? 'isMaintenanceMode' :
+        key === 'maintenance_message' ? 'maintenanceMessage' :
+          key === 'support_email' ? 'supportEmail' : "maintenanceMessage";
+
+      const [created] = await db.insert(systemSettings)
+        .values({ [field]: value })
+        .returning();
+      return created;
+    }
+  }
+
+  async searchGlobal(query: string): Promise<{
+    users: User[];
+    channels: Channel[];
+    transactions: any[];
+  }> {
+    const { ilike, or } = await import("drizzle-orm");
+
+    const matchedUsers = await db.select().from(users).where(
+      or(
+        ilike(users.username, `%${query}%`),
+        ilike(users.email, `%${query}%`),
+        ilike(users.phone || "", `%${query}%`)
+      )
+    ).limit(10);
+
+    const matchedChannels = await db.select().from(channels).where(
+      or(
+        ilike(channels.name, `%${query}%`),
+        ilike(channels.phoneNumber || "", `%${query}%`)
+      )
+    ).limit(10);
+
+    const matchedTransactions = await db.select().from(transactions).where(
+      or(
+        ilike(transactions.referenceId || "", `%${query}%`),
+        ilike(transactions.orderId || "", `%${query}%`)
+      )
+    ).limit(10);
+
+    return {
+      users: matchedUsers,
+      channels: matchedChannels,
+      transactions: matchedTransactions
     };
   }
 }

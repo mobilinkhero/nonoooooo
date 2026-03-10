@@ -99,6 +99,7 @@ import LanguageManagement from "./pages/LanguageManagement";
 import SuperadminMessageLogs from "./pages/SuperadminMessageLogs";
 import ApiDocs from "./pages/api-docs";
 import ChannelsManagement from "./pages/channels-management";
+import AdminSettings from "./pages/admin-settings";
 
 // Define route permissions mapping
 const ROUTE_PERMISSIONS: Record<string, string> = {
@@ -417,6 +418,9 @@ function ProtectedRoutes() {
           </Route>
           <Route path="/master-subscriptions">
             <PermissionRoute component={AllSubscriptionsPage} requiredRoles={["superadmin"]} />
+          </Route>
+          <Route path="/admin-settings">
+            <PermissionRoute component={AdminSettings} requiredRoles={["superadmin"]} />
           </Route>
           <Route component={NotFound} />
         </Switch>
