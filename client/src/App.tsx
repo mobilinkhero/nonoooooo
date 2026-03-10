@@ -233,6 +233,9 @@ function ProtectedRoutes() {
       <Sidebar />
       <div className="flex-1 lg:ml-64">
         <Switch>
+          <Route path="/">
+            <Dashboard />
+          </Route>
           <Route path="/dashboard">
             <Dashboard />
           </Route>
