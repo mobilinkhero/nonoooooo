@@ -21,9 +21,10 @@ async function throwIfResNotOk(res: Response) {
   if (res.ok) return;
 
   let message = "Something went wrong";
+  let data: any = {};
 
   try {
-    const data = await res.json();
+    data = await res.json();
 
     if (typeof data?.message === "string") {
       message = data.message;
@@ -32,6 +33,14 @@ async function throwIfResNotOk(res: Response) {
     }
   } catch {
     // ignore JSON parse error
+  }
+
+  // 🚀 REDIRECT TO PLANS ON 403 (Subscription Required)
+  if (res.status === 403 && (message.toLowerCase().includes("subscription") || message.toLowerCase().includes("plan"))) {
+    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/plans")) {
+      window.location.href = "/plans";
+      return;
+    }
   }
 
   throw new Error(message);
@@ -80,18 +89,18 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
-      credentials: "include",
-    });
+    async ({ queryKey }) => {
+      const res = await fetch(queryKey.join("/") as string, {
+        credentials: "include",
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
 
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+      await throwIfResNotOk(res);
+      return await res.json();
+    };
 
 export const queryClient = new QueryClient({
   defaultOptions: {

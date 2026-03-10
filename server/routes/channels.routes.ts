@@ -48,23 +48,24 @@ export function registerChannelRoutes(app: Express) {
   app.post("/api/channels/userid", channelsController.getChannelsByUserId)
 
   // Get active channel
-  app.get("/api/channels/active",requireAuth, channelsController.getActiveChannel);
+  app.get("/api/channels/active", requireAuth, channelsController.getActiveChannel);
 
   // Create channel
-  app.post("/api/channels", 
-    validateRequest(insertChannelSchema), requireSubscription("channel"), 
+  app.post("/api/channels",
+    validateRequest(insertChannelSchema), requireSubscription("channel"),
     channelsController.createChannel
   );
 
   // embedded signup
-   app.post(
-  "/api/whatsapp/embedded-signup",
-  requireAuth,
-  channelsController.embeddedSignup
-);
+  app.post(
+    "/api/whatsapp/embedded-signup",
+    requireAuth,
+    requireSubscription("channel"),
+    channelsController.embeddedSignup
+  );
 
   // Update channel
-  app.put("/api/channels/:id",requireAuth,  channelsController.updateChannel);
+  app.put("/api/channels/:id", requireAuth, channelsController.updateChannel);
 
   // Disconnect channel (deregister from Cloud API)
   app.post("/api/channels/:id/disconnect", requireAuth, channelsController.disconnectChannel);
@@ -74,7 +75,7 @@ export function registerChannelRoutes(app: Express) {
 
   // Check channel health
   app.post("/api/channels/:id/health", channelsController.checkChannelHealth);
-  
+
   // Check all channels health
   app.post("/api/channels/health-check-all", channelsController.checkAllChannelsHealth);
 

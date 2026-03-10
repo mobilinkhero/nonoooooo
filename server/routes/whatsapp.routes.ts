@@ -24,9 +24,12 @@ import { channelHealthMonitor } from "server/cron/channel-health-monitor";
 import { handleDigitalOceanUpload, upload } from "../middlewares/upload.middleware";
 import fs from "fs";
 
+import { requireSubscription } from "server/middlewares/requireSubscription";
+import { requireAuth } from "server/middlewares/auth.middleware";
+
 export function registerWhatsAppRoutes(app: Express) {
   // Get all WhatsApp channels
-  app.get("/api/whatsapp/channels", async (req, res) => {
+  app.get("/api/whatsapp/channels", requireAuth, async (req, res) => {
     try {
       const channels = await storage.getActiveChannel();
       res.json(channels);
@@ -37,7 +40,7 @@ export function registerWhatsAppRoutes(app: Express) {
   });
 
   // Get single WhatsApp channel
-  app.get("/api/whatsapp/channels/:id", async (req, res) => {
+  app.get("/api/whatsapp/channels/:id", requireAuth, async (req, res) => {
     try {
       const channel = await storage.getWhatsappChannel(req.params.id);
       if (!channel) {
@@ -51,7 +54,7 @@ export function registerWhatsAppRoutes(app: Express) {
   });
 
   // Create WhatsApp channel
-  app.post("/api/whatsapp/channels", async (req, res) => {
+  app.post("/api/whatsapp/channels", requireAuth, requireSubscription("channel"), async (req, res) => {
     try {
       const data = insertWhatsappChannelSchema.parse(req.body);
       const channel = await storage.createWhatsappChannel(data);
@@ -389,7 +392,7 @@ export function registerWhatsAppRoutes(app: Express) {
   // });
 
 
-  app.post("/api/whatsapp/channels/:id/send", async (req, res) => {
+  app.post("/api/whatsapp/channels/:id/send", requireAuth, requireSubscription("contacts"), async (req, res) => {
     try {
       console.log("🚀 SEND MESSAGE REQUEST");
       console.log("📝 Req params.id:", req.params.id);

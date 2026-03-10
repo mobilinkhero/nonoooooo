@@ -18,58 +18,58 @@
 import { Request, Response } from "express";
 import { DiployError, asyncHandler as _dHandler, diployLogger, HTTP_STATUS } from "@diploy/core";
 import { db } from "../db";
-import {users, channels} from "@shared/schema";
+import { users, channels } from "@shared/schema";
 import { eq, or, like, sql, and, desc, gte, inArray, gt } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
-import { otpVerifications } from "@shared/schema";
+import { otpVerifications, subscriptions, plans } from "@shared/schema";
 import { sendOTPEmailVerify } from "../services/email.service";
 
 
 // Default permissions 
-    const defaultPermissions = [
-      // Contacts
-      'contacts:view',
-      'contacts:create',
-      'contacts:edit',
-      'contacts:delete',
-      'contacts:export',
+const defaultPermissions = [
+  // Contacts
+  'contacts:view',
+  'contacts:create',
+  'contacts:edit',
+  'contacts:delete',
+  'contacts:export',
 
-      // Campaigns
-      'campaigns:view',
-      'campaigns:create',
-      'campaigns:edit',
-      'campaigns:delete',
+  // Campaigns
+  'campaigns:view',
+  'campaigns:create',
+  'campaigns:edit',
+  'campaigns:delete',
 
-      // Templates
-      'templates:view',
-      'templates:create',
-      'templates:edit',
-      'templates:delete',
+  // Templates
+  'templates:view',
+  'templates:create',
+  'templates:edit',
+  'templates:delete',
 
-      // Analytics
-      'analytics:view',
+  // Analytics
+  'analytics:view',
 
-      // Team
-      'team:view',
-      'team:create',
-      'team:edit',
-      'team:delete',
+  // Team
+  'team:view',
+  'team:create',
+  'team:edit',
+  'team:delete',
 
-      // Settings
-      'settings:view',
+  // Settings
+  'settings:view',
 
-      // Inbox
-      'inbox:view',
-      'inbox:send',
-      'inbox:assign',
+  // Inbox
+  'inbox:view',
+  'inbox:send',
+  'inbox:assign',
 
-      // Automations
-      'automations:view',
-      'automations:create',
-      'automations:edit',
-      'automations:delete',
-    ];
+  // Automations
+  'automations:view',
+  'automations:create',
+  'automations:edit',
+  'automations:delete',
+];
 
 
 export const getAllUsers = async (req: Request, res: Response) => {
@@ -504,6 +504,46 @@ export const verifyEmailOTP = async (req: Request, res: Response) => {
       .update(users)
       .set({ isEmailVerified: true })
       .where(eq(users.id, userData.id));
+
+    // 🚀 AUTO-ASSIGN TRIAL SUBSCRIPTION
+    try {
+      // Check if user already has a subscription
+      const existingSub = await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, userData.id))
+        .limit(1);
+
+      if (existingSub.length === 0) {
+        // Find a trial or basic plan
+        const allPlans = await db.select().from(plans).limit(10);
+        const trialPlan = allPlans.find(p =>
+          p.name.toLowerCase().includes('trial') ||
+          p.name.toLowerCase().includes('free') ||
+          p.monthlyPrice === "0"
+        ) || allPlans[0];
+
+        if (trialPlan) {
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + 7); // 7 day trial
+
+          await db.insert(subscriptions).values({
+            userId: userData.id,
+            planId: trialPlan.id,
+            status: "active",
+            startDate: new Date(),
+            endDate: endDate,
+            billingCycle: "monthly",
+            paymentGateway: "system", // Internal system trial
+          });
+
+          console.log(`✅ Assigned trial plan '${trialPlan.name}' to user ${userData.email}`);
+        }
+      }
+    } catch (subError) {
+      console.error("⚠️ Failed to auto-assign trial subscription:", subError);
+      // Don't fail the verification if trial assignment fails
+    }
 
     return res.json({
       success: true,

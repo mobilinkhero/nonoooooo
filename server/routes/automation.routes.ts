@@ -83,7 +83,7 @@ export function registerAutomationRoutes(app: Express) {
     "/api/automations",
     requireAuth,
     extractChannelId,
-    // requireSubscription("automation"),
+    requireSubscription("automation"),
     upload.any(),
     handleDigitalOceanUpload,
     createAutomation
@@ -127,7 +127,7 @@ export function registerAutomationRoutes(app: Express) {
     saveAutomationNodes
   );
 
-    // Save automation edges (bulk replace from builder)
+  // Save automation edges (bulk replace from builder)
   app.post(
     "/api/automations/:automationId/edges",
     requireAuth,
@@ -157,35 +157,35 @@ export function registerAutomationRoutes(app: Express) {
 
 
 
-// app.get("/", getAutomations);
-// app.get("/:id", getAutomation);
-// app.post("/", createAutomation);
-// app.put("/:id", updateAutomation);
-// app.delete("/:id", deleteAutomation);
-// app.patch("/:id/toggle", toggleAutomation);
+  // app.get("/", getAutomations);
+  // app.get("/:id", getAutomation);
+  // app.post("/", createAutomation);
+  // app.put("/:id", updateAutomation);
+  // app.delete("/:id", deleteAutomation);
+  // app.patch("/:id/toggle", toggleAutomation);
 
-// Node and Edge Management
-// app.post("/:automationId/nodes", saveAutomationNodes);
-// app.post("/:automationId/edges", saveAutomationEdges);
+  // Node and Edge Management
+  // app.post("/:automationId/nodes", saveAutomationNodes);
+  // app.post("/:automationId/edges", saveAutomationEdges);
 
-// Execution
-app.post("/api/automations/:automationId/execute", startAutomationExecution);
-app.post("/api/automations/:id/test", testAutomation); // NEW: Manual test
-app.get("/api/automations/:id/executions", getAutomationExecutions); // NEW: Get execution history
-app.get("/api/automations/executions/:executionId/status", getExecutionStatus); // NEW: Get execution status
+  // Execution
+  app.post("/api/automations/:automationId/execute", startAutomationExecution);
+  app.post("/api/automations/:id/test", testAutomation); // NEW: Manual test
+  app.get("/api/automations/:id/executions", getAutomationExecutions); // NEW: Get execution history
+  app.get("/api/automations/executions/:executionId/status", getExecutionStatus); // NEW: Get execution status
 
-// Logging
-app.post("/api/automations/executions/:executionId/logs", logAutomationNodeExecution);
+  // Logging
+  app.post("/api/automations/executions/:executionId/logs", logAutomationNodeExecution);
 
-// Triggers (these would typically be called from other parts of your app)
-app.post("/api/automations/triggers/new-conversation", triggerNewConversation);
-app.post("/api/automations/triggers/message-received", triggerMessageReceived);
+  // Triggers (these would typically be called from other parts of your app)
+  app.post("/api/automations/triggers/new-conversation", triggerNewConversation);
+  app.post("/api/automations/triggers/message-received", triggerMessageReceived);
 
 
 
-app.get('/api/automations/pending-executions', getAllPendingExecutions);
-app.post('/api/automations/cleanup-expired', cleanupExpiredExecutions);
+  app.get('/api/automations/pending-executions', getAllPendingExecutions);
+  app.post('/api/automations/cleanup-expired', cleanupExpiredExecutions);
 
-app.post('/api/automations/seed-templates', requireAuth, seedAutomationTemplates);
+  app.post('/api/automations/seed-templates', requireAuth, seedAutomationTemplates);
 
 }
