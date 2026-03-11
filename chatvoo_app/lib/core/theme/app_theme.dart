@@ -1,5 +1,6 @@
 // lib/core/theme/app_theme.dart
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Brand Colors — matches Chatvoo web design
@@ -30,12 +31,30 @@ class AppTheme {
   static const Color error = Color(0xFFEF4444);
   static const Color info = Color(0xFF3B82F6);
 
-  static const String fontFamily = 'Inter';
-
   static ThemeData get lightTheme {
+    // Use Google Fonts Inter — no local font files needed
+    final interTextTheme = GoogleFonts.interTextTheme(
+      const TextTheme(
+        displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: neutral900, letterSpacing: -0.5),
+        displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: neutral900, letterSpacing: -0.5),
+        headlineLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: neutral900),
+        headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: neutral900),
+        headlineSmall: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: neutral900),
+        titleLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: neutral900),
+        titleMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: neutral800),
+        titleSmall: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: neutral700),
+        bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: neutral800),
+        bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: neutral700),
+        bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: neutral500),
+        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: neutral900),
+        labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: neutral600),
+        labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: neutral500),
+      ),
+    );
+
     return ThemeData(
       useMaterial3: true,
-      fontFamily: fontFamily,
+      textTheme: interTextTheme,
       brightness: Brightness.light,
       scaffoldBackgroundColor: background,
 
@@ -55,19 +74,18 @@ class AppTheme {
       ),
 
       // AppBar
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: white,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         shadowColor: neutral200,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: TextStyle(
-          fontFamily: fontFamily,
+        titleTextStyle: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: neutral900,
         ),
-        iconTheme: IconThemeData(color: neutral700),
+        iconTheme: const IconThemeData(color: neutral700),
         centerTitle: false,
       ),
 
@@ -83,40 +101,20 @@ class AppTheme {
       ),
 
       // Bottom Navigation
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: white,
         selectedItemColor: primaryGreen,
         unselectedItemColor: neutral400,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: TextStyle(
-          fontFamily: fontFamily,
+        selectedLabelStyle: GoogleFonts.inter(
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: TextStyle(
-          fontFamily: fontFamily,
+        unselectedLabelStyle: GoogleFonts.inter(
           fontSize: 11,
           fontWeight: FontWeight.w400,
         ),
-      ),
-
-      // Text
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: neutral900, letterSpacing: -0.5),
-        displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: neutral900, letterSpacing: -0.5),
-        headlineLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: neutral900),
-        headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: neutral900),
-        headlineSmall: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: neutral900),
-        titleLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: neutral900),
-        titleMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: neutral800),
-        titleSmall: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: neutral700),
-        bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: neutral800),
-        bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: neutral700),
-        bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: neutral500),
-        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: neutral900),
-        labelMedium: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: neutral600),
-        labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: neutral500),
       ),
 
       // Input
@@ -140,8 +138,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: error),
         ),
-        hintStyle: const TextStyle(color: neutral400, fontSize: 14),
-        labelStyle: const TextStyle(color: neutral600, fontSize: 14),
+        hintStyle: GoogleFonts.inter(color: neutral400, fontSize: 14),
+        labelStyle: GoogleFonts.inter(color: neutral600, fontSize: 14),
       ),
 
       // ElevatedButton
@@ -153,8 +151,7 @@ class AppTheme {
           shadowColor: Colors.transparent,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: const TextStyle(
-            fontFamily: fontFamily,
+          textStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -168,8 +165,7 @@ class AppTheme {
           side: const BorderSide(color: neutral200),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: const TextStyle(
-            fontFamily: fontFamily,
+          textStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -187,7 +183,7 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: neutral100,
         selectedColor: primaryGreenLight,
-        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: neutral700),
+        labelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: neutral700),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         side: BorderSide.none,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

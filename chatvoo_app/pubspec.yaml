@@ -26,13 +26,12 @@ dependencies:
   shared_preferences: ^2.3.3
   flutter_secure_storage: ^9.2.2
   # UI Enhancements
+  google_fonts: ^6.2.1
   shimmer: ^3.0.0
   timeago: ^3.7.0
   intl: ^0.20.1
   fl_chart: ^0.69.2
   cached_network_image: ^3.4.1
-  # Icons
-  hugeicons: ^0.0.7
 
 dev_dependencies:
   flutter_test:
@@ -46,13 +45,3 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-  fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
-        - asset: assets/fonts/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Inter-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Inter-Bold.ttf
-          weight: 700

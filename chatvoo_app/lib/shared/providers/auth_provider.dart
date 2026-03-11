@@ -42,13 +42,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Future<void> login(String email, String password) async {
-    final data = await _service.login(email, password);
-    final user = await _service.getMe();
+  /// Login with username (NOT email — server uses username field)
+  Future<void> login(String username, String password) async {
+    final data = await _service.login(username, password);
+    // Server returns { message: "Login successful", user: { ... } }
+    final user = data['user'] as Map<String, dynamic>?;
+
+    // Fetch fresh /me to get the full session-backed user object
+    final freshUser = await _service.getMe();
+
     state = AuthState(
       isLoading: false,
-      isAuthenticated: user != null,
-      user: user ?? data['data'],
+      isAuthenticated: freshUser != null || user != null,
+      user: freshUser ?? user,
     );
   }
 

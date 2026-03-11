@@ -1,7 +1,6 @@
 // lib/features/auth/presentation/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/auth_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/providers/auth_provider.dart';
 
@@ -15,7 +14,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscurePass = true;
   bool _isLoading = false;
@@ -40,7 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   @override
   void dispose() {
     _animCtrl.dispose();
-    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -50,7 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     setState(() => _isLoading = true);
     try {
       await ref.read(authProvider.notifier).login(
-            _emailCtrl.text.trim(),
+            _usernameCtrl.text.trim(),
             _passCtrl.text,
           );
     } catch (e) {
@@ -164,14 +163,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     child: Column(
                       children: [
                         _buildField(
-                          controller: _emailCtrl,
-                          label: 'Email address',
-                          hint: 'you@company.com',
-                          icon: Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
+                          controller: _usernameCtrl,
+                          label: 'Username',
+                          hint: 'your_username',
+                          icon: Icons.person_outline_rounded,
+                          keyboardType: TextInputType.text,
                           validator: (v) {
-                            if (v == null || v.isEmpty) return 'Email is required';
-                            if (!v.contains('@')) return 'Enter a valid email';
+                            if (v == null || v.isEmpty) return 'Username is required';
                             return null;
                           },
                         ),
