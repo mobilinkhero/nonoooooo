@@ -209,12 +209,17 @@ function ProtectedRoutes() {
     if (isAuthenticated && user && user.role !== "superadmin") {
       const safePaths = ["/plans", "/account", "/billing", "/plan-upgrade", "/support-tickets", "/user-support-tickets"];
       if (!safePaths.includes(location)) {
-        if (!isUserPlansLoading && userPlans) {
-          const hasActive = (userPlans as any).data?.some((p: any) =>
-            p.subscription.status === "active" &&
-            (!p.subscription.endDate || new Date(p.subscription.endDate) > new Date())
-          );
-          if (!hasActive) {
+        if (!isUserPlansLoading) {
+          // userPlans from context is already the unwrapped array (auth-context strips .data)
+          const plansArray = Array.isArray(userPlans) ? userPlans : (userPlans as any)?.data;
+          const hasActive = Array.isArray(plansArray) && plansArray.some((p: any) => {
+            const sub = p.subscription || p;
+            return (
+              sub.status === "active" &&
+              (!sub.endDate || new Date(sub.endDate) > new Date())
+            );
+          });
+          if (plansArray !== undefined && !hasActive) {
             setLocation("/plans");
           }
         }
