@@ -1,0 +1,58 @@
+name: chatvoo_app
+description: "Chatvoo - WhatsApp Marketing Platform"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  # HTTP & Auth
+  dio: ^5.7.0
+  dio_cookie_manager: ^3.1.1
+  cookie_jar: ^4.0.8
+  path_provider: ^2.1.5
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+  # Navigation
+  go_router: ^14.6.2
+  # Real-time
+  web_socket_channel: ^3.0.1
+  # Cache / Storage
+  shared_preferences: ^2.3.3
+  flutter_secure_storage: ^9.2.2
+  # UI Enhancements
+  shimmer: ^3.0.0
+  timeago: ^3.7.0
+  intl: ^0.20.1
+  fl_chart: ^0.69.2
+  cached_network_image: ^3.4.1
+  # Icons
+  hugeicons: ^0.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  riverpod_generator: ^2.6.2
+  build_runner: ^2.4.13
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
